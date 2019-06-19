@@ -1,5 +1,5 @@
 # weather-API
 weather API made with Django 
 
-User: User1
-Pass: User12341234
+User: User
+Pass: 12341234
