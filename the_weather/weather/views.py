@@ -1,24 +1,34 @@
 from django.shortcuts import render
 import requests
-
+from .models import City
+from .forms import CityForm
 
 def index(request):
-    url = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=imperial&appid=fadf4949eac29a8cc732f222d6993339'
-    city = 'Las Vegas'
-    city_weather = requests.get(url.format(city)).json() #request the API data and convert the JSON to Python data types
+    cities = City.objects.all() #return all the cities in the database
 
-    return render(request, 'weather/index.html') #returns the index.html template
+    url = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=imperial&appid=271d1234d3f497eed5b1d80a07b3fcd1'
 
-    weather = {
-        'city' : city,
-        'temperature' : city_weather['main']['temp'],
-        'description' : city_weather['weather'][0]['description'],
-        'icon' : city_weather['weather'][0]['icon']
-    }
+    if request.method == 'POST': # only true if form is submitted
+        form = CityForm(request.POST) # add actual request data to form for processing
+        form.save() # will validate and save if validate
 
-    return render(request, 'weather/index.html') #returns the index.html template
+    form = CityForm()
 
-    return render(request, 'weather/index.html') #returns the index.html template
-   
-    context = {'weather' : weather}
+    weather_data = []
+
+    for city in cities:
+
+        city_weather = requests.get(url.format(city)).json() #request the API data and convert the JSON to Python data types
+        
+        weather = {
+            'city' : city,
+            'temperature' : city_weather['main']['temp'],
+            'description' : city_weather['weather'][0]['description'],
+            'icon' : city_weather['weather'][0]['icon']
+        }
+
+        weather_data.append(weather) #add the data for the current city into our list
+    
+    context = {'weather_data' : weather_data, 'form' : form}
+
     return render(request, 'weather/index.html', context) #returns the index.html template
